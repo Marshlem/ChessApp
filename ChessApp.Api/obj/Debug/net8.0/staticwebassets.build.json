@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "xCzqT/eLhD//RXegeSHhaGLju9MulPnD0jNUGf8Ph3M=",
+  "Source": "ChessApp.Api",
+  "BasePath": "_content/ChessApp.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

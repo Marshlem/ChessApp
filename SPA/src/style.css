@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/* GLOBAL STYLES */
+@layer base {
+  :root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light;
+    color: #111827;            /* gray-900 */
+    background-color: #f9fafb; /* gray-50 */
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* --- BASIC TAGS --- */
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background-color: #f9fafb;
+    color: #111827;
+  }
+
+  #app {
+    width: 100%;
+  }
+
+  h1, h2, h3, h4, h5 {
+    color: #111827;
+    font-weight: 600;
+  }
+
+  p {
+    color: #374151; /* gray-700 */
+  }
+
+  a {
+    color: #2563eb; /* blue-600 */
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: #1d4ed8; /* blue-700 */
+    text-decoration: underline;
+  }
+
+  /* --- BUTTON RESET (VISUAL STYLE – TAILWIND VALDO) --- */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* --- FORM RESET (STILIUS PER TAILWIND) --- */
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  /* --- TABLE RESET --- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  /* --- SCROLLBAR (LIGHT) --- */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #d1d5db; /* gray-300 */
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af; /* gray-400 */
+  }
+
+  /* --- MEDIA --- */
+  @media (max-width: 640px) {
+    #app {
+      padding: 1rem;
+    }
+  }
+}
