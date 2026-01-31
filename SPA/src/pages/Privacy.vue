@@ -8,71 +8,93 @@
     <div class="prose prose-sm max-w-none mt-6">
       <h2>Overview</h2>
       <p>
-        This Privacy Policy explains what data we collect, why we collect it, and how it is used when you use
-        InvestmentTracker (the “Service”).
+        This Privacy Policy explains what personal data is collected, how it is used,
+        and how it is protected when you use ChessApp (the “Service”).
       </p>
 
       <h2>Data we collect</h2>
       <ul>
-        <li><strong>Account data:</strong> username and password (stored as a hash), authentication tokens.</li>
-        <li><strong>Financial tracking data you enter:</strong> assets, categories, transactions, notes (if any).</li>
-        <li><strong>Technical data:</strong> basic logs needed to operate and secure the Service (e.g., request time, errors).</li>
+        <li>
+          <strong>Account data:</strong> email address, password (stored as a secure hash),
+          authentication and refresh tokens.
+        </li>
+        <li>
+          <strong>Chess training data:</strong> openings, training lines, positions,
+          practice history, progress statistics, and notes you create.
+        </li>
+        <li>
+          <strong>Technical data:</strong> basic logs required to operate and secure the Service
+          (for example, timestamps, error logs, and IP address for security purposes).
+        </li>
       </ul>
 
       <h2>How we use your data</h2>
       <ul>
-        <li>To provide the Service and features you use (dashboard, assets, transactions).</li>
-        <li>To authenticate you and protect your account.</li>
-        <li>To maintain, debug, and improve reliability and security.</li>
+        <li>To provide and operate the Service and its features.</li>
+        <li>To authenticate users and protect accounts.</li>
+        <li>To store your chess training data and track your learning progress.</li>
+        <li>To maintain, debug, and improve the reliability and security of the Service.</li>
       </ul>
 
       <h2>Legal basis (EEA / Lithuania)</h2>
       <ul>
-        <li><strong>Contract:</strong> to provide the Service you request.</li>
-        <li><strong>Legitimate interests:</strong> security, fraud prevention, and service stability.</li>
-        <li><strong>Consent:</strong> only if we add optional analytics or marketing cookies in the future.</li>
+        <li>
+          <strong>Contract:</strong> processing is necessary to provide the Service you request.
+        </li>
+        <li>
+          <strong>Legitimate interests:</strong> ensuring security, preventing abuse,
+          and maintaining system stability.
+        </li>
+        <li>
+          <strong>Consent:</strong> only if optional features (such as analytics) are added in the future.
+        </li>
       </ul>
 
       <h2>Cookies and local storage</h2>
       <p>
-        The Service may use cookies or local storage to keep you signed in and to store basic preferences.
-        If optional analytics are enabled in the future, we will update this policy and (where required) request consent.
+        ChessApp uses cookies or local storage to keep you signed in and to store basic preferences.
+        No advertising or tracking cookies are used.
+        If optional analytics are introduced in the future, this policy will be updated accordingly.
       </p>
 
-      <h2>Sharing</h2>
+      <h2>Data sharing</h2>
       <p>
-        We do not sell your personal data. We may share data only when required to operate the Service
-        (e.g., hosting providers) or when legally required.
+        We do not sell your personal data.
+        Data may be shared only with service providers necessary to operate the Service
+        (such as hosting or database providers), or when required by law.
       </p>
 
       <h2>Data retention</h2>
       <p>
-        We keep your account and the data you enter for as long as your account is active.
-        You may request deletion of your account and associated data.
+        Your account and chess training data are retained for as long as your account remains active.
+        You may request deletion of your account and associated data at any time.
       </p>
 
       <h2>Security</h2>
       <p>
-        We use reasonable technical and organizational measures to protect your data, including password hashing
-        and access controls. No system is 100% secure.
+        We apply reasonable technical and organizational measures to protect your data,
+        including password hashing, access controls, and encrypted communication.
+        However, no system can be guaranteed to be 100% secure.
       </p>
 
       <h2>Your rights</h2>
       <ul>
-        <li>Access, correction, deletion, and data portability (where applicable).</li>
-        <li>Object to or restrict processing in certain cases.</li>
-        <li>Withdraw consent (if we rely on it).</li>
-        <li>Lodge a complaint with your local data protection authority.</li>
+        <li>The right to access, correct, or delete your personal data.</li>
+        <li>The right to restrict or object to processing in certain circumstances.</li>
+        <li>The right to data portability, where applicable.</li>
+        <li>The right to lodge a complaint with your local data protection authority.</li>
       </ul>
 
       <h2>Contact</h2>
       <p>
-        For privacy questions or requests, contact: <a href="mailto:privacy@investmenttracker.com">privacy@investmenttracker.com</a>
+        For privacy-related questions or requests, contact:
+        <a href="mailto:privacy@chessapp.dev">privacy@chessapp.dev</a>
       </p>
 
       <h2>Changes</h2>
       <p>
-        We may update this policy as the Service evolves. We will post the updated date at the top of this page.
+        This Privacy Policy may be updated as the Service evolves.
+        Any changes will be reflected by updating the date at the top of this page.
       </p>
     </div>
   </div>

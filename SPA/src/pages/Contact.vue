@@ -2,12 +2,12 @@
   <div class="max-w-3xl mx-auto p-6">
     <h1 class="text-2xl font-semibold text-gray-900">Contact</h1>
     <p class="mt-2 text-sm text-gray-600">
-      Last updated: 2026-01-18
+      Last updated: 2026-01-31
     </p>
 
     <div class="prose prose-sm max-w-none mt-6">
       <p>
-        If you have questions, feedback, or need support regarding InvestmentTracker,
+        If you have questions, feedback, or need support regarding ChessApp,
         you can reach us using the contact information below.
       </p>
 

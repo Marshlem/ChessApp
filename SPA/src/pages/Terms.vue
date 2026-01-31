@@ -8,64 +8,70 @@
     <div class="prose prose-sm max-w-none mt-6">
       <h2>Acceptance of terms</h2>
       <p>
-        By accessing or using InvestmentTracker (the “Service”), you agree to these Terms of Service.
-        If you do not agree, do not use the Service.
+        By accessing or using ChessApp (the “Service”), you agree to be bound by these Terms of Service.
+        If you do not agree with these terms, you should not use the Service.
       </p>
 
       <h2>Description of the service</h2>
       <p>
-        InvestmentTracker is a personal investment tracking tool that allows users to record and view
-        information about their assets and transactions.
+        ChessApp is an online chess training and learning platform.
+        It allows users to create, store, and practice chess openings, track their training progress,
+        and improve their chess skills through interactive tools.
       </p>
 
-      <h2>No financial advice</h2>
+      <h2>Educational purpose</h2>
       <p>
-        The Service is provided for informational and tracking purposes only.
-        It does not provide investment, financial, tax, or legal advice.
-        You are solely responsible for your financial decisions.
+        The Service is provided for educational and training purposes only.
+        ChessApp does not guarantee improvement in playing strength, rating, or competitive results.
+        Progress depends on individual effort and practice.
       </p>
 
       <h2>User accounts</h2>
       <p>
-        You are responsible for maintaining the confidentiality of your account credentials and for all
-        activities that occur under your account.
+        You are responsible for maintaining the confidentiality of your account credentials
+        and for all activities that occur under your account.
+        You agree to provide accurate and up-to-date information when creating an account.
       </p>
 
-      <h2>User data</h2>
+      <h2>User-generated content</h2>
       <p>
-        You retain ownership of the data you enter into the Service.
-        By using the Service, you grant us the right to store and process this data solely to provide
-        the Service.
+        You retain ownership of the chess data you create or upload, including openings,
+        training lines, and notes.
+        By using the Service, you grant ChessApp permission to store and process this data
+        solely for the purpose of providing the Service.
       </p>
 
-      <h2>Availability</h2>
+      <h2>Availability and changes</h2>
       <p>
         The Service is provided on an “as is” and “as available” basis.
-        We do not guarantee uninterrupted or error-free operation.
+        We may modify, suspend, or discontinue any part of the Service at any time
+        without prior notice.
       </p>
 
       <h2>Limitation of liability</h2>
       <p>
-        To the maximum extent permitted by law, we are not liable for any direct or indirect damages,
-        including financial losses, arising from the use of or inability to use the Service.
+        To the maximum extent permitted by law, ChessApp shall not be liable for any
+        direct or indirect damages arising from the use of, or inability to use, the Service,
+        including loss of data or training progress.
       </p>
 
       <h2>Termination</h2>
       <p>
-        We may suspend or terminate access to the Service at any time if these terms are violated
-        or if the Service is discontinued.
+        We reserve the right to suspend or terminate your access to the Service
+        if these Terms are violated or if the Service is discontinued.
       </p>
 
-      <h2>Changes to the terms</h2>
+      <h2>Changes to these terms</h2>
       <p>
         These Terms may be updated from time to time.
-        Continued use of the Service after changes means you accept the updated Terms.
+        Continued use of the Service after changes become effective
+        constitutes acceptance of the updated Terms.
       </p>
 
       <h2>Contact</h2>
       <p>
-        If you have questions about these Terms, contact:
-        <a href="mailto:support@investmenttracker.com">support@investmenttracker.com</a>
+        If you have any questions about these Terms, please contact us at:
+        <a href="mailto:support@chessapp.dev">support@chessapp.dev</a>
       </p>
     </div>
   </div>

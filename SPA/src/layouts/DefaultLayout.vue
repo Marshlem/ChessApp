@@ -10,11 +10,23 @@ import AppFooter from '@/layouts/AppFooter.vue'
       <!-- LOGO + BRAND -->
       <router-link to="/" class="flex items-center gap-2 font-semibold">
         <img class="h-7 w-auto" src="/logo40px.svg" alt="Marshlem Development" />
-        <span>Investment Tracker</span>
+        <span>Chess Learning</span>
       </router-link>
 
       <!-- MENU (tik prisijungus) -->
       <nav v-if="isAuthenticated()" class="flex items-center gap-2">
+        <router-link
+          to="/openings"
+          class="px-3 py-2 text-sm rounded-md hover:bg-black/5"
+        >
+          Openings
+        </router-link>
+        <router-link
+          to="/practicing"
+          class="px-3 py-2 text-sm rounded-md hover:bg-black/5"
+        >
+          Practicing
+        </router-link>
       </nav>
 
       <!-- LOGOUT -->

@@ -15,10 +15,20 @@ const routes = [
     component: () => import('../layouts/DefaultLayout.vue'),
     children: [
 
-            {
+      {
         path: '',
         name: 'home',
         component: () => import('../pages/Home.vue')
+      },
+      {
+        path: 'openings',
+        name: 'openings',
+        component: () => import('../pages/Openings.vue')
+      },
+      {
+        path: 'practicing',
+        name: 'practicing',
+        component: () => import('../pages/Practicing.vue')
       },
       // PUBLIC
       {
