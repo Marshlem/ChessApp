@@ -29,7 +29,7 @@ public class ApplicationDbContext : DbContext
         {
             eb.ToTable("Users");
 
-            eb.HasKey(u => u.Id);
+            eb.Property(u => u.Id).ValueGeneratedOnAdd();
 
             eb.Property(u => u.Id)
                 .ValueGeneratedOnAdd();
@@ -110,6 +110,7 @@ public class ApplicationDbContext : DbContext
             eb.HasOne(x => x.RootNode)
             .WithMany() 
             .HasForeignKey(x => x.RootNodeId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
             eb.HasIndex(x => new { x.UserId, x.Color, x.Name }).IsUnique();
@@ -131,10 +132,10 @@ public class ApplicationDbContext : DbContext
                 .IsRequired();
 
             eb.Property(x => x.Type)
-                .IsRequired();
+                .IsRequired(); // Opening
 
             eb.Property(x => x.Color)
-                .IsRequired();
+                .IsRequired(); // White / Black
 
             eb.Property(x => x.Name)
                 .IsRequired()
@@ -144,20 +145,16 @@ public class ApplicationDbContext : DbContext
                 .IsRequired()
                 .HasDefaultValue(0);
 
-            eb.HasOne(x => x.Parent)
-                .WithMany(x => x.Children)
-                .HasForeignKey(x => x.ParentId)
-                .OnDelete(DeleteBehavior.Restrict); 
+            eb.Property(x => x.OpeningId)
+                .IsRequired(false);
 
             eb.HasOne(x => x.Opening)
                 .WithMany()
                 .HasForeignKey(x => x.OpeningId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Cascade);
 
-            eb.HasIndex(x => new { x.UserId, x.Color, x.ParentId, x.SortOrder });
-            eb.HasIndex(x => new { x.UserId, x.OpeningId });
-
-            eb.HasIndex(x => new { x.UserId, x.ParentId, x.Name })
+            eb.HasIndex(x => new { x.UserId, x.Color, x.SortOrder });
+            eb.HasIndex(x => new { x.UserId, x.Color, x.Name })
                 .IsUnique();
         });
 

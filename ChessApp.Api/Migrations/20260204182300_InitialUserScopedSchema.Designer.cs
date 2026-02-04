@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChessApp.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260131221845_AddedModels")]
-    partial class AddedModels
+    [Migration("20260204182300_InitialUserScopedSchema")]
+    partial class InitialUserScopedSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,9 +27,11 @@ namespace ChessApp.Api.Migrations
 
             modelBuilder.Entity("ChessApp.API.Models.Opening", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Color")
                         .HasColumnType("integer");
@@ -42,11 +44,11 @@ namespace ChessApp.Api.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
 
-                    b.Property<Guid>("RootNodeId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("RootNodeId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -60,9 +62,11 @@ namespace ChessApp.Api.Migrations
 
             modelBuilder.Entity("ChessApp.API.Models.OpeningNode", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Comment")
                         .HasMaxLength(2000)
@@ -83,11 +87,11 @@ namespace ChessApp.Api.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<Guid>("OpeningId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("OpeningId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid?>("ParentNodeId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("ParentNodeId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -137,9 +141,11 @@ namespace ChessApp.Api.Migrations
 
             modelBuilder.Entity("ChessApp.API.Models.RepertoireItem", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Color")
                         .HasColumnType("integer");
@@ -149,11 +155,8 @@ namespace ChessApp.Api.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
 
-                    b.Property<Guid?>("OpeningId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("OpeningId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("SortOrder")
                         .ValueGeneratedOnAdd()
@@ -163,30 +166,28 @@ namespace ChessApp.Api.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OpeningId");
 
-                    b.HasIndex("ParentId");
-
-                    b.HasIndex("UserId", "OpeningId");
-
-                    b.HasIndex("UserId", "ParentId", "Name")
+                    b.HasIndex("UserId", "Color", "Name")
                         .IsUnique();
 
-                    b.HasIndex("UserId", "Color", "ParentId", "SortOrder");
+                    b.HasIndex("UserId", "Color", "SortOrder");
 
                     b.ToTable("RepertoireItems", (string)null);
                 });
 
             modelBuilder.Entity("ChessApp.API.Models.TrainingNodeStats", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("FailedCount")
                         .ValueGeneratedOnAdd()
@@ -199,16 +200,16 @@ namespace ChessApp.Api.Migrations
                     b.Property<DateTime?>("NextDueAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("OpeningNodeId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("OpeningNodeId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("TrainedCount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -272,8 +273,7 @@ namespace ChessApp.Api.Migrations
                     b.HasOne("ChessApp.API.Models.OpeningNode", "RootNode")
                         .WithMany()
                         .HasForeignKey("RootNodeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("RootNode");
                 });
@@ -312,16 +312,9 @@ namespace ChessApp.Api.Migrations
                     b.HasOne("ChessApp.API.Models.Opening", "Opening")
                         .WithMany()
                         .HasForeignKey("OpeningId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("ChessApp.API.Models.RepertoireItem", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Opening");
-
-                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("ChessApp.API.Models.TrainingNodeStats", b =>
@@ -336,11 +329,6 @@ namespace ChessApp.Api.Migrations
                 });
 
             modelBuilder.Entity("ChessApp.API.Models.OpeningNode", b =>
-                {
-                    b.Navigation("Children");
-                });
-
-            modelBuilder.Entity("ChessApp.API.Models.RepertoireItem", b =>
                 {
                     b.Navigation("Children");
                 });

@@ -5,6 +5,10 @@ using ChessApp.API.Infrastructure.Security;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using ChessApp.API.Data;
+using ChessApp.API.Queries.Openings;
+using ChessApp.API.Handlers.Repertoire;
+using ChessApp.API.Handlers.Openings;
+using ChessApp.API.Handlers.OpeningNodes;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -22,6 +26,18 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<GetCandidateMovesQuery>();
+builder.Services.AddScoped<GetOpeningDetailsQuery>();
+builder.Services.AddScoped<GetRepertoireTreeQuery>();
+
+builder.Services.AddScoped<OpeningNodeReadRepository>();
+builder.Services.AddScoped<OpeningNodeWriteRepository>();
+
+builder.Services.AddScoped<CreateOpeningHandler>();
+builder.Services.AddScoped<DeleteOpeningHandler>();
+builder.Services.AddScoped<AddMoveHandler>();
+builder.Services.AddScoped<DeleteOpeningNodeSubtreeHandler>();
 
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
