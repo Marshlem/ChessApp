@@ -121,3 +121,4 @@ C:\Users\sigit\Desktop\cProjects\ChessApp\ChessApp.Api\obj\Debug\net8.0\refint\C
 C:\Users\sigit\Desktop\cProjects\ChessApp\ChessApp.Api\obj\Debug\net8.0\ChessApp.Api.pdb
 C:\Users\sigit\Desktop\cProjects\ChessApp\ChessApp.Api\obj\Debug\net8.0\ChessApp.Api.genruntimeconfig.cache
 C:\Users\sigit\Desktop\cProjects\ChessApp\ChessApp.Api\obj\Debug\net8.0\ref\ChessApp.Api.dll
+C:\Users\sigit\Desktop\cProjects\ChessApp\ChessApp.Api\bin\Debug\net8.0\ChessDotNet.dll

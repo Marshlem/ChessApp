@@ -1,5 +1,7 @@
 using ChessApp.API.Data;
 using ChessApp.API.DTOs.OpeningNodes;
+using ChessApp.API.Enums;
+using ChessApp.API.Infrastructure;
 using ChessApp.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,69 +16,62 @@ public sealed class AddMoveHandler
         _db = db;
     }
 
-    public async Task<int> Execute(int userId, int openingId, AddMoveRequest request)
+    public async Task<AddMoveResponse> Execute(int userId, int openingId, AddMoveRequest request)
     {
         var parent = await _db.OpeningNodes
-            .AsNoTracking()
-            .Where(x => x.Id == request.ParentNodeId)
-            .Select(x => new
-            {
-                x.Id,
-                x.OpeningId,
-                OpeningUserId = x.Opening.UserId
-            })
-            .FirstOrDefaultAsync();
+            .Include(x => x.Opening)
+            .FirstOrDefaultAsync(x =>
+                x.Id == request.ParentNodeId &&
+                x.OpeningId == openingId &&
+                x.Opening.UserId == userId);
 
         if (parent == null)
-            throw new InvalidOperationException("Parent node not found.");
+            throw new KeyNotFoundException("Parent node not found");
 
-        if (parent.OpeningId != openingId)
-            throw new InvalidOperationException("Parent node does not belong to this opening.");
+        var (ok, newFen, moveSan) = ChessRules.TryApplyUci(parent.Fen, request.MoveUci);
+        if (!ok || newFen == null)
+            return AddMoveResponse.IllegalMove();
 
-        if (parent.OpeningUserId != userId)
-            throw new UnauthorizedAccessException("Access denied.");
+        // ✅ 1️⃣ ar toks FEN jau egzistuoja?
+        var existingNode = await _db.OpeningNodes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x =>
+                x.OpeningId == openingId &&
+                x.Fen == newFen);
 
-        var exists = await _db.OpeningNodes.AnyAsync(x =>
-            x.OpeningId == openingId &&
-            x.ParentNodeId == request.ParentNodeId &&
-            x.MoveSan == request.MoveSan);
-
-        if (exists)
-            throw new InvalidOperationException("This move already exists in this position.");
-
-        var node = new OpeningNode
+        if (existingNode != null)
         {
-            Id = _db.OpeningNodes.Max(x => x.Id) + 1,
+            // 👉 NIEKO nekuriam
+            return new AddMoveResponse
+            {
+                Success = true,
+                NodeId = existingNode.Id,
+                Fen = existingNode.Fen,
+                Reused = true
+            };
+        }
+
+        // ✅ 2️⃣ kuriam naują node
+        var newNode = new OpeningNode
+        {
             OpeningId = openingId,
-            ParentNodeId = request.ParentNodeId,
-            Fen = request.FenAfter.Trim(),
-            MoveSan = request.MoveSan.Trim(),
-            LineType = request.LineType,
-            Comment = string.IsNullOrWhiteSpace(request.Comment) ? null : request.Comment.Trim(),
+            ParentNodeId = parent.Id,
+            Fen = newFen,
+            MoveSan = moveSan,
+            LineType = LineType.Main,
             CreatedAtUtc = DateTime.UtcNow
         };
 
-        _db.OpeningNodes.Add(node);
-
-        var statsExists = await _db.TrainingNodeStats.AnyAsync(x =>
-            x.UserId == userId && x.OpeningNodeId == node.Id);
-
-        if (!statsExists)
-        {
-            _db.TrainingNodeStats.Add(new TrainingNodeStats
-            {
-                Id = _db.TrainingNodeStats.Max(x => x.Id) + 1,
-                UserId = userId,
-                OpeningNodeId = node.Id,
-                TrainedCount = 0,
-                FailedCount = 0,
-                LastTrainedAtUtc = null,
-                NextDueAtUtc = null
-            });
-        }
-
+        _db.OpeningNodes.Add(newNode);
         await _db.SaveChangesAsync();
 
-        return node.Id;
+        return new AddMoveResponse
+        {
+            Success = true,
+            NodeId = newNode.Id,
+            Fen = newNode.Fen,
+            MoveSan = newNode.MoveSan,
+            Reused = false
+        };
     }
 }

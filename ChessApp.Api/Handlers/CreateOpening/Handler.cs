@@ -2,7 +2,7 @@ using ChessApp.API.Data;
 using ChessApp.API.DTOs.Repertoire;
 using ChessApp.API.Enums;
 using ChessApp.API.Models;
-using Microsoft.EntityFrameworkCore;
+using ChessApp.API.Constants;
 
 namespace ChessApp.API.Handlers.Repertoire;
 public sealed class CreateOpeningHandler
@@ -20,11 +20,7 @@ public sealed class CreateOpeningHandler
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required");
 
-        var sortOrder =
-            await _db.RepertoireItems
-                .Where(x => x.UserId == userId && x.Color == request.Color)
-                .Select(x => (int?)x.SortOrder)
-                .MaxAsync() ?? 0;
+        await using var tx = await _db.Database.BeginTransactionAsync();
 
         var opening = new Opening
         {
@@ -33,29 +29,35 @@ public sealed class CreateOpeningHandler
             CreatedAtUtc = DateTime.UtcNow
         };
 
+        _db.Openings.Add(opening);
+        await _db.SaveChangesAsync();
+
         var rootNode = new OpeningNode
         {
-            Opening = opening,
-            Fen = "startpos",
+            OpeningId = opening.Id,
+            ParentNodeId = null,
+            Fen = FenConstants.StartFen,
             LineType = LineType.Main,
             CreatedAtUtc = DateTime.UtcNow
         };
 
+        _db.OpeningNodes.Add(rootNode);
+        await _db.SaveChangesAsync();
+
+        opening.RootNodeId = rootNode.Id;
+
         var item = new RepertoireItem
         {
             UserId = userId,
-            Type = RepertoireItemType.Opening,
             Color = request.Color,
             Name = name,
-            SortOrder = sortOrder + 1,
-            Opening = opening
+            OpeningId = opening.Id
         };
 
-        _db.AddRange(opening, rootNode, item);
-        await _db.SaveChangesAsync(); 
+        _db.RepertoireItems.Add(item);
 
-        opening.RootNodeId = rootNode.Id;
-        await _db.SaveChangesAsync(); 
+        await _db.SaveChangesAsync();
+        await tx.CommitAsync();
 
         return opening.Id;
     }

@@ -132,10 +132,8 @@ namespace ChessApp.Api.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
                     Color = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
-                    SortOrder = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     OpeningId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -197,11 +195,6 @@ namespace ChessApp.Api.Migrations
                 table: "RepertoireItems",
                 columns: new[] { "UserId", "Color", "Name" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RepertoireItems_UserId_Color_SortOrder",
-                table: "RepertoireItems",
-                columns: new[] { "UserId", "Color", "SortOrder" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrainingNodeStats_OpeningNodeId",

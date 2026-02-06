@@ -47,6 +47,10 @@
               "target": "Package",
               "version": "[4.0.3, )"
             },
+            "ChessDotNet": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
             "MediatR": {
               "target": "Package",
               "version": "[12.*, )"

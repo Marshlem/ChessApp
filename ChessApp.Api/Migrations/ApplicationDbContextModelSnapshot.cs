@@ -155,14 +155,6 @@ namespace ChessApp.Api.Migrations
                     b.Property<int?>("OpeningId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SortOrder")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
@@ -172,8 +164,6 @@ namespace ChessApp.Api.Migrations
 
                     b.HasIndex("UserId", "Color", "Name")
                         .IsUnique();
-
-                    b.HasIndex("UserId", "Color", "SortOrder");
 
                     b.ToTable("RepertoireItems", (string)null);
                 });

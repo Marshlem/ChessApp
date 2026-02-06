@@ -4,9 +4,7 @@ export interface RepertoireItem {
   id: string
   parentId?: string | null
   name: string
-  type: number
   color: number
-  sortOrder: number
 }
 
 export async function getRepertoireTree(): Promise<RepertoireItem[]> {

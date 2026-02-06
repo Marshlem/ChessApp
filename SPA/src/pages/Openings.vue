@@ -67,11 +67,11 @@ const WHITE = 1
 const BLACK = 2
 
 const whiteOpenings = computed(() =>
-  items.value.filter(x => x.type === 2 && x.color === WHITE)
+  items.value.filter(x => x.color === WHITE)
 )
 
 const blackOpenings = computed(() =>
-  items.value.filter(x => x.type === 2 && x.color === BLACK)
+  items.value.filter(x => x.color === BLACK)
 )
 
 function openOpening(openingId: string) {

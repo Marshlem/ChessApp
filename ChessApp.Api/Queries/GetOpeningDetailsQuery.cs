@@ -30,51 +30,38 @@ public sealed class GetOpeningDetailsQuery
         if (opening == null)
             throw new KeyNotFoundException("Opening not found");
 
-        var rootNode = await _db.OpeningNodes
-            .AsNoTracking()
-            .Where(n => n.Id == opening.RootNodeId && n.OpeningId == openingId)
-            .Select(n => new OpeningNodeDto
-            {
-                Id = n.Id,
-                ParentNodeId = n.ParentNodeId,
-                Fen = n.Fen,
-                MoveSan = n.MoveSan,
-                LineType = (int)n.LineType,
-                Comment = n.Comment,
-                Training = _db.TrainingNodeStats
-                    .AsNoTracking()
-                    .Where(s => s.UserId == userId && s.OpeningNodeId == n.Id)
-                    .Select(s => new TrainingNodeStatsDto
-                    {
-                        TrainedCount = s.TrainedCount,
-                        FailedCount = s.FailedCount,
-                        LastTrainedAtUtc = s.LastTrainedAtUtc,
-                        NextDueAtUtc = s.NextDueAtUtc
-                    })
-                    .FirstOrDefault()
-            })
-            .FirstOrDefaultAsync();
-
-        if (rootNode == null)
-            throw new KeyNotFoundException("Root node not found");
+        if (opening.RootNodeId == null)
+            throw new InvalidOperationException("Opening has no root node");
 
         var breadcrumbs = new List<RepertoireBreadcrumbDto>
         {
             new()
             {
                 Id = opening.Id,
-                Name = opening.Color == OpeningColor.White ? "White" : "Black",
-                SortOrder = 0
+                Name = opening.Color == OpeningColor.White ? "White" : "Black"
             }
         };
+
+        var nodes = await _db.OpeningNodes
+            .AsNoTracking()
+            .Where(x => x.OpeningId == openingId)
+            .Select(x => new OpeningNodeDto
+            {
+                Id = x.Id,
+                ParentNodeId = x.ParentNodeId,
+                Fen = x.Fen,
+                MoveSan = x.MoveSan
+            })
+            .ToListAsync();
 
         return new OpeningDetailsDto
         {
             OpeningId = opening.Id,
-            RootNodeId = opening.RootNodeId,
+            RootNodeId = opening.RootNodeId.Value,
             CreatedAtUtc = opening.CreatedAtUtc,
+            Color = opening.Color,
             Breadcrumbs = breadcrumbs,
-            RootNode = rootNode
+            Nodes = nodes
         };
     }
 }

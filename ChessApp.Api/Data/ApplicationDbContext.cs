@@ -131,19 +131,13 @@ public class ApplicationDbContext : DbContext
             eb.Property(x => x.UserId)
                 .IsRequired();
 
-            eb.Property(x => x.Type)
-                .IsRequired(); // Opening
 
             eb.Property(x => x.Color)
-                .IsRequired(); // White / Black
+                .IsRequired(); 
 
             eb.Property(x => x.Name)
                 .IsRequired()
                 .HasMaxLength(120);
-
-            eb.Property(x => x.SortOrder)
-                .IsRequired()
-                .HasDefaultValue(0);
 
             eb.Property(x => x.OpeningId)
                 .IsRequired(false);
@@ -153,7 +147,6 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(x => x.OpeningId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            eb.HasIndex(x => new { x.UserId, x.Color, x.SortOrder });
             eb.HasIndex(x => new { x.UserId, x.Color, x.Name })
                 .IsUnique();
         });

@@ -15,8 +15,8 @@ public sealed class OpeningNodesController : ControllerBase
     public async Task<IActionResult> AddMove(int openingId, [FromBody] AddMoveRequest request, [FromServices] AddMoveHandler handler)
     {
         var userId = UserContext.GetUserId(User);
-        var nodeId = await handler.Execute(userId, openingId, request);
-        return Ok(nodeId);
+        var result = await handler.Execute(userId, openingId, request);
+        return Ok(result);
     }
 
     [HttpGet("{parentNodeId:int}/children")]

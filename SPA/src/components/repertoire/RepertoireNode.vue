@@ -4,9 +4,6 @@
       class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 rounded px-2 py-1"
       @click="onClick"
     >
-      <span v-if="item.type === 1">📁</span>
-      <span v-else>♟️</span>
-
       <span>{{ item.name }}</span>
     </div>
 
@@ -40,8 +37,6 @@ const children = computed(() =>
 )
 
 function onClick() {
-  if (props.item.type === 2) {
     emit('open-opening', props.item.id)
-  }
 }
 </script>
