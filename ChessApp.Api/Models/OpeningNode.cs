@@ -20,4 +20,5 @@ public sealed class OpeningNode
     public string? Comment { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
+    public string? MoveUci { get; set; } = null!;
 }

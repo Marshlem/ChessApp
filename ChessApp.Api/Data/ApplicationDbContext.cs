@@ -164,6 +164,7 @@ public class ApplicationDbContext : DbContext
             eb.Property(x => x.LineType).IsRequired();
             eb.Property(x => x.Comment).HasMaxLength(2000);
             eb.Property(x => x.CreatedAtUtc).IsRequired();
+            eb.Property(x => x.MoveUci).HasMaxLength(20);
 
             eb.HasOne(x => x.Opening)
             .WithMany() 

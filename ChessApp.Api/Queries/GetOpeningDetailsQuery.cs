@@ -50,7 +50,8 @@ public sealed class GetOpeningDetailsQuery
                 Id = x.Id,
                 ParentNodeId = x.ParentNodeId,
                 Fen = x.Fen,
-                MoveSan = x.MoveSan
+                MoveSan = x.MoveSan,
+                MoveUci = x.MoveUci
             })
             .ToListAsync();
 

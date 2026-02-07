@@ -60,6 +60,7 @@ public sealed class AddMoveHandler
             OpeningId = openingId,
             ParentNodeId = parent.Id,
             Fen = newFen,
+            MoveUci = request.MoveUci,
             MoveSan = moveSan, 
             LineType = LineType.Main,
             CreatedAtUtc = DateTime.UtcNow

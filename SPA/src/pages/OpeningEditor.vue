@@ -15,19 +15,32 @@
       Opening editor
     </h1>
 
-    <!-- Chessboard only -->
-    <div class="flex justify-center">
-        <ChessBoard
-        v-if="currentFen"
-        :key="boardKey"
-        :fen="currentFen"
-        @move="onBoardMove"
-        @promotion="onPromotion"
-        />
-      <div v-else class="text-sm text-gray-500">
-        Loading board…
-      </div>
+    <div class="display flex">
+        <div class="display inline-block w-32 mr-6">
+            <MoveTable
+            v-if="opening"
+            :rows="moveTable"
+            />
+        </div>
+
+        <!-- Chessboard only -->
+        <div class="flex justify-center">
+            <ChessBoard
+            v-if="currentFen"
+            :key="boardKey"
+            :fen="currentFen"
+            @move="onBoardMove"
+            @promotion="onPromotion"
+            />
+            <div v-else class="text-sm text-gray-500">
+                Loading board…
+            </div>
+        </div>
+        <div>
+            <!-- /placehoder for future features like comments, position evaluation, etc. -->
+        </div>
     </div>
+
 
     <div v-if="tree" class="border rounded p-3">
         <h2 class="font-medium mb-2">Opening tree</h2>
@@ -79,6 +92,8 @@ import api from '@/services/api'
 import ChessBoard from '@/components/chess/ChessBoard.vue'
 import OpeningTree from '@/components/repertoire/OpeningTree.vue'
 import { computed } from 'vue'
+import { uciToSan } from '@/services/chessSan'
+import MoveTable from '@/components/repertoire/MoveTable.vue'
 
 interface Breadcrumb {
   id: number
@@ -90,6 +105,7 @@ interface OpeningNode {
   parentNodeId: number | null
   fen: string
   moveSan?: string
+  moveUci?: string 
 }
 
 interface OpeningDetails {
@@ -126,6 +142,41 @@ const tree = computed(() => {
   if (!opening.value) return null
   return buildTree(opening.value.nodes, opening.value.rootNodeId)
 })
+
+const moveTable = computed(() => {
+  if (!opening.value || !currentNodeId.value) return []
+
+  const line = buildLine(opening.value.nodes, currentNodeId.value)
+
+  const rows: { move: number; white?: string; black?: string }[] = []
+
+  line.forEach(node => {
+    if (!node.parentNodeId || !node.moveUci) return
+
+    const parent = opening.value!.nodes.find(n => n.id === node.parentNodeId)
+    if (!parent) return
+
+    // 1) Teisingas SAN iš parent FEN + UCI
+    const san = uciToSan(parent.fen, node.moveUci)
+
+    // 2) Iš parent FEN nusprendžiam į kurį stulpelį dėti
+    const [, sideToMove, , , , fullmove] = parent.fen.split(' ')
+    const moveNumber = Number(fullmove)
+
+    let row = rows.find(r => r.move === moveNumber)
+    if (!row) {
+      row = { move: moveNumber }
+      rows.push(row)
+    }
+
+    // jei parent’e ėjo baltieji -> šitas node yra baltųjų ėjimas
+    if (sideToMove === 'w') row.white = san
+    else row.black = san
+  })
+
+  return rows
+})
+
 
 const pendingPromotion = ref<{
   from: string
@@ -218,6 +269,7 @@ async function submitMove(uci: string) {
     id: res.data.nodeId,
     parentNodeId: parentId,
     fen: res.data.fen,
+    moveUci: uci, 
     moveSan: res.data.moveSan
   })
 
@@ -253,4 +305,21 @@ function onKeyDown(e: KeyboardEvent) {
     cancelPromotion()
   }
 }
+
+function buildLine(
+  nodes: OpeningNode[],
+  currentId: number
+): OpeningNode[] {
+  const map = new Map(nodes.map(n => [n.id, n]))
+  const line: OpeningNode[] = []
+
+  let cur = map.get(currentId)
+  while (cur && cur.parentNodeId) {
+    line.unshift(cur)
+    cur = map.get(cur.parentNodeId)
+  }
+
+  return line
+}
+
 </script>
