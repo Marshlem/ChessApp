@@ -28,11 +28,16 @@ public sealed class AddMoveHandler
         if (parent == null)
             throw new KeyNotFoundException("Parent node not found");
 
-        var (ok, newFen, moveSan) = ChessRules.TryApplyUci(parent.Fen, request.MoveUci);
-        if (!ok || newFen == null)
+        if (!ChessRules.TryApplyUci(
+                parent.Fen,
+                request.MoveUci,
+                out var newFen,
+                out var moveSan))
+        {
             return AddMoveResponse.IllegalMove();
+        }
 
-        // ✅ 1️⃣ ar toks FEN jau egzistuoja?
+        // ✅ deduplikacija pagal FEN
         var existingNode = await _db.OpeningNodes
             .AsNoTracking()
             .FirstOrDefaultAsync(x =>
@@ -41,7 +46,6 @@ public sealed class AddMoveHandler
 
         if (existingNode != null)
         {
-            // 👉 NIEKO nekuriam
             return new AddMoveResponse
             {
                 Success = true,
@@ -51,13 +55,12 @@ public sealed class AddMoveHandler
             };
         }
 
-        // ✅ 2️⃣ kuriam naują node
         var newNode = new OpeningNode
         {
             OpeningId = openingId,
             ParentNodeId = parent.Id,
             Fen = newFen,
-            MoveSan = moveSan,
+            MoveSan = moveSan, 
             LineType = LineType.Main,
             CreatedAtUtc = DateTime.UtcNow
         };
