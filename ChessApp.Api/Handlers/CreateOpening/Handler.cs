@@ -20,8 +20,6 @@ public sealed class CreateOpeningHandler
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required");
 
-        await using var tx = await _db.Database.BeginTransactionAsync();
-
         var opening = new Opening
         {
             UserId = userId,
@@ -30,12 +28,11 @@ public sealed class CreateOpeningHandler
         };
 
         _db.Openings.Add(opening);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(); // reikia ID
 
         var rootNode = new OpeningNode
         {
             OpeningId = opening.Id,
-            ParentNodeId = null,
             Fen = FenConstants.StartFen,
             LineType = LineType.Main,
             CreatedAtUtc = DateTime.UtcNow
@@ -46,19 +43,18 @@ public sealed class CreateOpeningHandler
 
         opening.RootNodeId = rootNode.Id;
 
-        var item = new RepertoireItem
+        var repertoireItem = new RepertoireItem
         {
             UserId = userId,
-            Color = request.Color,
             Name = name,
+            Color = request.Color,
             OpeningId = opening.Id
         };
 
-        _db.RepertoireItems.Add(item);
-
+        _db.RepertoireItems.Add(repertoireItem);
         await _db.SaveChangesAsync();
-        await tx.CommitAsync();
 
         return opening.Id;
     }
+
 }

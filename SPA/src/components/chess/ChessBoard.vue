@@ -10,8 +10,13 @@ import { Chessground } from 'chessground'
 import { Chess } from 'chess.js'
 import type { Key } from 'chessground/types'
 import type { Square } from 'chess.js'
+import type { DrawShape } from 'chessground/draw'
 
-const props = defineProps<{ fen: string }>()
+const props = defineProps<{
+  fen: string
+  arrows?: { from: string; to: string }[]
+  orientation?: 'white' | 'black'
+}>()
 const chess = ref<Chess | null>(null)
 
 const emit = defineEmits<{
@@ -29,29 +34,32 @@ onMounted(() => {
     fen: props.fen,
     viewOnly: false,
     coordinates: true,
+    orientation: props.orientation ?? 'white',
+    drawable: {
+      enabled: true,
+      autoShapes: buildArrows()
+    },
     movable: {
       free: false,
       color: 'both',
       dests: computeDests(),
       events: {
         after: (orig: string, dest: string) => {
-        if (!chess.value) return
+          if (!chess.value) return
 
-        const moves = chess.value.moves({
+          const moves = chess.value.moves({
             square: orig as unknown as Square,
             verbose: true
-        })
+          })
 
-        const promotionMove = moves.find(
-            m => m.to === dest && m.isPromotion()
-        )
+          const promotionMove = moves.find(m => m.to === dest && m.isPromotion())
 
-        if (promotionMove) {
+          if (promotionMove) {
             emit('promotion', orig, dest)
             return
-        }
+          }
 
-        emit('move', `${orig}${dest}`)
+          emit('move', `${orig}${dest}`)
         }
       }
     }
@@ -75,6 +83,32 @@ watch(
         }
       })
     }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.arrows,
+  () => {
+    if (!ground) return
+
+    ground.set({
+      drawable: {
+        autoShapes: buildArrows()
+      }
+    })
+  },
+  { deep: true, immediate: true }
+)
+
+watch(
+  () => props.orientation,
+  (o) => {
+    if (!ground || !o) return
+
+    ground.set({
+      orientation: o
+    })
   },
   { immediate: true }
 )
@@ -109,5 +143,13 @@ function computeDests(): Map<Key, Key[]> {
   return dests
 }
 
+function buildArrows(): DrawShape[] {
+  if (!props.arrows) return []
 
+  return props.arrows.map(a => ({
+    orig: a.from as Key,
+    dest: a.to as Key,
+    brush: 'green'
+  }))
+}
 </script>

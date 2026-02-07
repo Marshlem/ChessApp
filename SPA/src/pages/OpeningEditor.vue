@@ -1,21 +1,15 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 space-y-4">
-    <!-- Breadcrumbs -->
-    <div class="text-sm text-gray-500">
-      <span
-        v-for="(b, i) in opening?.breadcrumbs"
-        :key="b.id"
-      >
-        <span v-if="i > 0"> / </span>
-        {{ b.name }}
-      </span>
-    </div>
-
+  <div class="max-w-4xl mx-auto p-6 space-y-4" :key="openingId">
     <h1 class="text-2xl font-semibold">
       Opening editor
     </h1>
 
     <div class="display flex">
+
+        <div class="display inline-block w-32 mr-6">
+          <OpeningsList @select="openOpening" />
+        </div>
+
         <div class="display inline-block w-32 mr-6">
             <MoveTable
             v-if="opening"
@@ -24,16 +18,18 @@
         </div>
 
         <!-- Chessboard only -->
-        <div class="flex justify-center">
+        <div :key="openingId" class="flex justify-center">
             <ChessBoard
             v-if="currentFen"
             :key="boardKey"
             :fen="currentFen"
+            :arrows="nextMoves"
+            :orientation="boardOrientation"
             @move="onBoardMove"
             @promotion="onPromotion"
             />
             <div v-else class="text-sm text-gray-500">
-                Loading board…
+            Select or create an opening to start editing
             </div>
         </div>
         <div>
@@ -86,14 +82,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { onUnmounted, ref, watch, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/services/api'
 import ChessBoard from '@/components/chess/ChessBoard.vue'
 import OpeningTree from '@/components/repertoire/OpeningTree.vue'
-import { computed } from 'vue'
 import { uciToSan } from '@/services/chessSan'
 import MoveTable from '@/components/repertoire/MoveTable.vue'
+import OpeningsList from '@/components/repertoire/OpeningsList.vue'
 
 interface Breadcrumb {
   id: number
@@ -112,6 +108,7 @@ interface OpeningDetails {
   rootNodeId: number
   breadcrumbs: Breadcrumb[]
   nodes: OpeningNode[]
+  color: number
 }
 
 interface TreeNode {
@@ -123,7 +120,8 @@ interface TreeNode {
 }
 
 const route = useRoute()
-const openingId = route.params.openingId as string
+const router = useRouter()
+const openingId = computed(() => route.params.openingId as string | undefined)
 
 const opening = ref<OpeningDetails | null>(null)
 const currentFen = ref<string>('')
@@ -141,6 +139,14 @@ type PromotionPiece = typeof promotionPieces[number]
 const tree = computed(() => {
   if (!opening.value) return null
   return buildTree(opening.value.nodes, opening.value.rootNodeId)
+})
+
+const WHITE = 1
+const BLACK = 2
+
+const boardOrientation = computed<'white' | 'black'>(() => {
+  if (!opening.value) return 'white'
+  return opening.value.color === BLACK ? 'black' : 'white'
 })
 
 const moveTable = computed(() => {
@@ -183,29 +189,38 @@ const pendingPromotion = ref<{
   to: string
 } | null>(null)
 
-onMounted(async () => {
-  window.addEventListener('keydown', onKeyDown)
-  const res = await api.get(`/openings/${openingId}`)
-  opening.value = res.data
+const nextMoves = computed(() => {
+  if (!opening.value || !currentNodeId.value) return []
 
-  if (!opening.value) return
-
-  const rootNode = opening.value.nodes.find(
-    n => n.id === opening.value!.rootNodeId
-  )
-
-  if (!rootNode) {
-    console.error('Root node not found')
-    return
-  }
-
-  currentFen.value = rootNode.fen
-  currentNodeId.value = rootNode.id
+  return opening.value.nodes
+    .filter(n => n.parentNodeId === currentNodeId.value && n.moveUci)
+    .map(n => ({
+      from: n.moveUci!.slice(0, 2),
+      to: n.moveUci!.slice(2, 4)
+    }))
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeyDown)
 })
+
+watch(
+  () => openingId.value,
+  async (id) => {
+    if (!id) return
+
+    const { data } = await api.get(`/openings/${id}`)
+    opening.value = data
+
+    const root = data.nodes.find((n: OpeningNode) => n.id === data.rootNodeId)
+    if (!root) return
+
+    currentNodeId.value = root.id
+    currentFen.value = root.fen
+  },
+  { immediate: true }
+)
+
 
 function buildTree(nodes: OpeningNode[], rootId: number): TreeNode | null {
   const map = new Map<number, TreeNode>()
@@ -249,7 +264,7 @@ async function submitMove(uci: string) {
   lastFen.value = currentFen.value
 
   const res = await api.post(
-    `/openings/${openingId}/nodes`,
+    `/openings/${openingId.value}/nodes`,
     {
       parentNodeId: parentId,
       moveUci: uci
@@ -320,6 +335,13 @@ function buildLine(
   }
 
   return line
+}
+
+function openOpening(id: number) {
+  router.push({
+    name: 'opening-editor',
+    params: { openingId: String(id) }
+  })
 }
 
 </script>

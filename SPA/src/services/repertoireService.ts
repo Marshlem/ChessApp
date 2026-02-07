@@ -5,6 +5,7 @@ export interface RepertoireItem {
   parentId?: string | null
   name: string
   color: number
+  openingId?: number | null
 }
 
 export async function getRepertoireTree(): Promise<RepertoireItem[]> {

@@ -3,6 +3,7 @@ namespace ChessApp.API.DTOs.Openings;
 public sealed class RepertoireBreadcrumbDto
 {
     public int Id { get; set; }
+    public OpeningColor Color { get; set; }
     public int? ParentId { get; set; }
     public string Name { get; set; } = null!;
 }

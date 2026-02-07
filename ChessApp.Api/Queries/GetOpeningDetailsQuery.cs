@@ -22,10 +22,14 @@ public sealed class GetOpeningDetailsQuery
             {
                 x.Id,
                 x.RootNodeId,
-                x.CreatedAtUtc,
-                x.Color
+                x.CreatedAtUtc
             })
             .FirstOrDefaultAsync();
+
+        var color = await _db.RepertoireItems
+            .Where(r => r.OpeningId == openingId && r.UserId == userId)
+            .Select(r => r.Color)
+            .SingleAsync();
 
         if (opening == null)
             throw new KeyNotFoundException("Opening not found");
@@ -38,7 +42,7 @@ public sealed class GetOpeningDetailsQuery
             new()
             {
                 Id = opening.Id,
-                Name = opening.Color == OpeningColor.White ? "White" : "Black"
+                Color = color
             }
         };
 
@@ -60,7 +64,7 @@ public sealed class GetOpeningDetailsQuery
             OpeningId = opening.Id,
             RootNodeId = opening.RootNodeId.Value,
             CreatedAtUtc = opening.CreatedAtUtc,
-            Color = opening.Color,
+            Color = color,
             Breadcrumbs = breadcrumbs,
             Nodes = nodes
         };

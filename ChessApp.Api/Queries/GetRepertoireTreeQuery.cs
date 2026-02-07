@@ -19,6 +19,7 @@ public async Task<List<RepertoireItemDto>> Execute(int userId)
         .Select(x => new RepertoireItemDto
         {
             Id = x.Id,
+            OpeningId = x.Opening != null ? x.Opening.Id : null,
             Name = x.Name,
             Color = x.Color
         })

@@ -6,7 +6,6 @@ public sealed class Opening
     public int UserId { get; set; }
 
     public string Name { get; set; } = null!;
-    public OpeningColor Color { get; set; }
 
     public int? RootNodeId { get; set; }
     public OpeningNode? RootNode { get; set; } = null!;

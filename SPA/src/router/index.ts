@@ -21,12 +21,7 @@ const routes = [
         component: () => import('../pages/Home.vue')
       },
       {
-        path: 'openings',
-        name: 'openings',
-        component: () => import('../pages/Openings.vue')
-      },
-      {
-        path: '/openings/:openingId',
+        path: '/openings/:openingId?',
         name: 'opening-editor',
         component: () => import('@/pages/OpeningEditor.vue')
       },

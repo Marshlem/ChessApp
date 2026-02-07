@@ -10,10 +10,7 @@
         class="w-full border rounded px-3 py-2"
       />
 
-      <select
-        v-model="color"
-        class="w-full border rounded px-3 py-2"
-      >
+      <select v-model.number="color">
         <option :value="1">White</option>
         <option :value="2">Black</option>
       </select>
@@ -49,7 +46,7 @@ const emit = defineEmits<{
 }>()
 
 const name = ref('')
-const color = ref(1) // 1 = White, 2 = Black
+const color = ref<number>(1)
 
 async function submit() {
   const openingId = await createOpening({

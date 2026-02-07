@@ -104,7 +104,6 @@ public class ApplicationDbContext : DbContext
 
             eb.Property(x => x.UserId).IsRequired();
             eb.Property(x => x.Name).IsRequired().HasMaxLength(120);
-            eb.Property(x => x.Color).IsRequired();
             eb.Property(x => x.CreatedAtUtc).IsRequired();
 
             eb.HasOne(x => x.RootNode)
@@ -113,7 +112,7 @@ public class ApplicationDbContext : DbContext
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
-            eb.HasIndex(x => new { x.UserId, x.Color, x.Name }).IsUnique();
+            eb.HasIndex(x => new { x.UserId, x.Name }).IsUnique();
         });
 
         // =========================
