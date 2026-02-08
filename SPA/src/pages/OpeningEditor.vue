@@ -32,8 +32,12 @@
             Select or create an opening to start editing
             </div>
         </div>
-        <div>
-            <!-- /placehoder for future features like comments, position evaluation, etc. -->
+        <div class="display inline-block w-32 mr-6">
+          <CandidateMoves
+            v-if="opening && currentFen"
+            :fen="currentFen"
+            :current-opening-id="openingIdNum"
+          />
         </div>
     </div>
 
@@ -90,6 +94,7 @@ import OpeningTree from '@/components/repertoire/OpeningTree.vue'
 import { uciToSan } from '@/services/chessSan'
 import MoveTable from '@/components/repertoire/MoveTable.vue'
 import OpeningsList from '@/components/repertoire/OpeningsList.vue'
+import CandidateMoves from '@/components/repertoire/CandidateMoves.vue'
 
 interface Breadcrumb {
   id: number
@@ -133,6 +138,7 @@ const promotionPieces = ['Q', 'R', 'B', 'N'] as const
 const promotionColor = computed(() =>
   currentFen.value.split(' ')[1] === 'w' ? 'w' : 'b'
 )
+const openingIdNum = computed(() => Number(openingId.value))
 
 type PromotionPiece = typeof promotionPieces[number]
 

@@ -5,11 +5,9 @@ namespace ChessApp.API.DTOs.OpeningNodes;
 
 public sealed class CandidateMoveDto
 {
-    public int NodeId { get; set; }
+    public int OpeningId { get; set; }
+    public string OpeningName { get; set; } = null!;
     public string MoveSan { get; set; } = null!;
-
-    public LineType LineType { get; set; }
-    public string? Comment { get; set; }
-
-    public TrainingNodeStatsDto? Training { get; set; }
+    public string MoveUci { get; set; } = null!;
+    public bool IsFromCurrentOpening { get; set; }
 }

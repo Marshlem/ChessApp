@@ -19,14 +19,6 @@ public sealed class OpeningNodesController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{parentNodeId:int}/children")]
-    public async Task<IActionResult> GetChildren(int openingId, int parentNodeId, [FromServices] GetCandidateMovesQuery query)
-    {
-        var userId = UserContext.GetUserId(User);
-        var result = await query.Execute(userId, openingId, parentNodeId);
-        return Ok(result);
-    }
-
     [HttpDelete("{nodeId:int}")]
     public async Task<IActionResult> DeleteSubtree(int openingId, int nodeId, [FromServices] DeleteOpeningNodeSubtreeHandler handler)
     {
