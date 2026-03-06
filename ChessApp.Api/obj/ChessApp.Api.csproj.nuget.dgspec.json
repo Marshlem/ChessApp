@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\ChessApp.Api\\ChessApp.Api.csproj": {}
+    "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\chessapp.api\\ChessApp.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\ChessApp.Api\\ChessApp.Api.csproj": {
+    "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\chessapp.api\\ChessApp.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\ChessApp.Api\\ChessApp.Api.csproj",
+        "projectUniqueName": "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\chessapp.api\\ChessApp.Api.csproj",
         "projectName": "ChessApp.Api",
-        "projectPath": "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\ChessApp.Api\\ChessApp.Api.csproj",
+        "projectPath": "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\chessapp.api\\ChessApp.Api.csproj",
         "packagesPath": "C:\\Users\\sigit\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\ChessApp.Api\\obj\\",
+        "outputPath": "C:\\Users\\sigit\\Desktop\\cProjects\\ChessApp\\chessapp.api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\sigit\\AppData\\Roaming\\NuGet\\NuGet.Config"

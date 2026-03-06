@@ -9,6 +9,7 @@ public sealed class TrainingNodeStats
     public int OpeningNodeId { get; set; }
     public OpeningNode OpeningNode { get; set; } = null!;
 
+    public int Bucket { get; set; }
     public int TrainedCount { get; set; }
     public int FailedCount { get; set; }
 

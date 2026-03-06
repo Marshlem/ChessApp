@@ -9,6 +9,8 @@ using ChessApp.API.Queries.Openings;
 using ChessApp.API.Handlers.Repertoire;
 using ChessApp.API.Handlers.Openings;
 using ChessApp.API.Handlers.OpeningNodes;
+using ChessApp.Application.Training.GetNextTrainingPosition;
+using ChessApp.Application.Training.GetTrainingSummary;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -38,6 +40,7 @@ builder.Services.AddScoped<CreateOpeningHandler>();
 builder.Services.AddScoped<DeleteOpeningHandler>();
 builder.Services.AddScoped<AddMoveHandler>();
 builder.Services.AddScoped<DeleteOpeningNodeSubtreeHandler>();
+builder.Services.AddScoped<GetNextTrainingPositionHandler>();
 
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
@@ -70,7 +73,7 @@ builder.Services.AddCors(opt =>
         p.WithOrigins(config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
          .AllowAnyHeader()
          .AllowAnyMethod()
-         .AllowCredentials()); // optional
+         .AllowCredentials()); 
 });
 
 builder.Services.AddRateLimiter(opt =>

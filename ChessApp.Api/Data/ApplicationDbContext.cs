@@ -208,6 +208,10 @@ public class ApplicationDbContext : DbContext
 
             eb.Property(x => x.NextDueAtUtc);
 
+            eb.Property(x => x.Bucket)
+                .IsRequired()
+                .HasDefaultValue(0);
+
             eb.HasIndex(x => new { x.UserId, x.OpeningNodeId })
                 .IsUnique();
 
