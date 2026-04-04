@@ -1,13 +1,15 @@
 <template>
-  <ul class="space-y-1">
-    <RepertoireNode
-      v-for="item in rootItems"
-      :key="item.id"
-      :item="item"
-      :all-items="items"
-      @open-opening="$emit('open-opening', $event)"
-    />
-  </ul>
+  <div class="rounded-xl border border-gray-200 bg-white p-3">
+    <ul class="space-y-1">
+      <RepertoireNode
+        v-for="item in rootItems"
+        :key="item.id"
+        :item="item"
+        :all-items="items"
+        @open-opening="$emit('open-opening', $event)"
+      />
+    </ul>
+  </div>
 </template>
 
 <script setup lang="ts">

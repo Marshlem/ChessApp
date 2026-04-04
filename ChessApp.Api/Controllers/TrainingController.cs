@@ -62,7 +62,7 @@ public sealed class TrainingController : ControllerBase
         return Ok(result);
     }
 
-        [HttpGet("summary")]
+    [HttpGet("summary")]
     public async Task<IActionResult> GetSummary(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

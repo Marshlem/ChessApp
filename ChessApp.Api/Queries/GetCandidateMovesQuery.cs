@@ -36,6 +36,7 @@ public sealed class GetCandidateMovesQuery
             .Where(x => x.Opening.UserId == userId)
             .Select(x => new CandidateMoveDto
             {
+                NodeId = x.Node.Id,
                 OpeningId = x.Opening.Id,
                 OpeningName = x.Opening.Name,
                 MoveSan = x.Node.MoveSan!,

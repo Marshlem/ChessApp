@@ -9,6 +9,7 @@ export interface RepertoireItem {
 }
 
 export type CandidateMove = {
+  nodeId: number
   moveSan: string
   moveUci: string
   openingId: number
@@ -42,4 +43,11 @@ export async function getCandidateMoves(params: {
   })
 
   return data
+}
+
+export async function deleteOpeningNodeSubtree(
+  openingId: number, 
+  nodeId: number
+) {
+  await api.delete(`/openings/${openingId}/nodes/${nodeId}`)
 }

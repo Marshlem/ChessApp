@@ -35,8 +35,10 @@
         <div class="display inline-block w-32 mr-6">
           <CandidateMoves
             v-if="opening && currentFen"
+            :key="candidateMovesKey"
             :fen="currentFen"
             :current-opening-id="openingIdNum"
+            @delete-from-here="handleDeleteFromHere"
           />
         </div>
     </div>
@@ -95,6 +97,7 @@ import { uciToSan } from '@/services/chessSan'
 import MoveTable from '@/components/repertoire/MoveTable.vue'
 import OpeningsList from '@/components/repertoire/OpeningsList.vue'
 import CandidateMoves from '@/components/repertoire/CandidateMoves.vue'
+import { deleteOpeningNodeSubtree } from '@/services/repertoireService'
 
 interface Breadcrumb {
   id: number
@@ -139,6 +142,7 @@ const promotionColor = computed(() =>
   currentFen.value.split(' ')[1] === 'w' ? 'w' : 'b'
 )
 const openingIdNum = computed(() => Number(openingId.value))
+const candidateMovesKey = ref(0)
 
 type PromotionPiece = typeof promotionPieces[number]
 
@@ -168,10 +172,8 @@ const moveTable = computed(() => {
     const parent = opening.value!.nodes.find(n => n.id === node.parentNodeId)
     if (!parent) return
 
-    // 1) Teisingas SAN iš parent FEN + UCI
     const san = uciToSan(parent.fen, node.moveUci)
 
-    // 2) Iš parent FEN nusprendžiam į kurį stulpelį dėti
     const [, sideToMove, , , , fullmove] = parent.fen.split(' ')
     const moveNumber = Number(fullmove)
 
@@ -181,7 +183,6 @@ const moveTable = computed(() => {
       rows.push(row)
     }
 
-    // jei parent’e ėjo baltieji -> šitas node yra baltųjų ėjimas
     if (sideToMove === 'w') row.white = san
     else row.black = san
   })
@@ -348,6 +349,27 @@ function openOpening(id: number) {
     name: 'opening-editor',
     params: { openingId: String(id) }
   })
+}
+
+async function handleDeleteFromHere(move: { nodeId: number; openingId: number; san: string }) {
+  if (!openingId.value || !opening.value) return
+
+  const deletedNode = opening.value.nodes.find((n: OpeningNode) => n.id === move.nodeId)
+  const parentNodeId = deletedNode?.parentNodeId ?? null
+
+  await deleteOpeningNodeSubtree(Number(openingId.value), move.nodeId)
+
+  const { data } = await api.get(`/openings/${openingId.value}`)
+  opening.value = data
+
+  const target =
+    data.nodes.find((n: OpeningNode) => n.id === parentNodeId) ??
+    data.nodes.find((n: OpeningNode) => n.id === data.rootNodeId)
+
+  currentNodeId.value = target?.id ?? null
+  currentFen.value = target?.fen ?? ''
+  boardKey.value++
+  candidateMovesKey.value++
 }
 
 </script>

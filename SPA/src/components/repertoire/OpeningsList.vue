@@ -2,10 +2,22 @@
   <div class="w-full p-0 m-0 space-y-3">
     <div class="space-y-3">
       <section>
-        <button class="text-sm font-medium mb-1 hover:bg-gray-100" @click="showOpening = true">
-        Add Opening
-      </button>
+        <button
+          class="w-full flex items-center justify-center gap-2
+                bg-gray-900 text-white
+                text-sm font-semibold
+                px-3 py-2.5
+                rounded-lg
+                hover:bg-gray-800
+                active:bg-gray-700
+                transition"
+          @click="showOpening = true"
+        >
+          <span class="text-base leading-none">+</span>
+          Add opening
+        </button>
       </section>
+      <section class="pb-2"></section>
 
       <section>
         <h2 class="text-sm font-medium mb-1">White Openings</h2>

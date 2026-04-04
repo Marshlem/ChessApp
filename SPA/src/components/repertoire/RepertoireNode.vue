@@ -1,13 +1,30 @@
 <template>
-  <li class="pl-2">
+  <li class="pl-1">
     <div
-      class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 rounded px-2 py-1"
+      class="relative flex items-center gap-2 cursor-pointer rounded-md px-2 py-1.5
+             text-sm text-gray-800 hover:bg-gray-100 transition"
       @click="onClick"
     >
-      <span>{{ item.name }}</span>
+      <!-- connector -->
+      <span class="absolute -left-3 top-1/2 -translate-y-1/2 w-2 h-px bg-gray-200"></span>
+
+      <!-- name -->
+      <span class="truncate">
+        {{ item.name }}
+      </span>
+
+      <!-- optional badge (ateičiai) -->
+      <!--
+      <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 text-gray-700">
+        Main
+      </span>
+      -->
     </div>
 
-    <ul v-if="children.length" class="ml-4">
+    <ul
+      v-if="children.length"
+      class="ml-3 pl-3 border-l border-gray-200 space-y-1"
+    >
       <RepertoireNode
         v-for="c in children"
         :key="c.id"
@@ -37,6 +54,6 @@ const children = computed(() =>
 )
 
 function onClick() {
-    emit('open-opening', props.item.id)
+  emit('open-opening', props.item.id)
 }
 </script>

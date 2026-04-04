@@ -5,6 +5,7 @@ namespace ChessApp.API.DTOs.OpeningNodes;
 
 public sealed class CandidateMoveDto
 {
+    public int NodeId { get; set; }
     public int OpeningId { get; set; }
     public string OpeningName { get; set; } = null!;
     public string MoveSan { get; set; } = null!;

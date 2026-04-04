@@ -1,92 +1,84 @@
 <template>
-  <div class="max-w-3xl mx-auto p-6 space-y-4">
+  <div class="max-w-5xl mx-auto p-6 space-y-6">
     <h1 class="text-2xl font-semibold text-gray-900">
       Practicing
     </h1>
 
-    <div v-if="summary" class="border rounded p-3">
-      <div class="grid grid-cols-3 gap-4 text-sm">
-        <div>
-          <div class="text-gray-500">Total</div>
-          <div class="text-lg font-semibold">{{ summary.totalPositions }}</div>
-        </div>
+    <template v-if="!trainingStarted">
+      <TrainingSetupPanel v-model="setup" />
 
-        <div>
-          <div class="text-gray-500">New</div>
-          <div class="text-lg font-semibold">{{ summary.newPositions }}</div>
-        </div>
+      <div class="border rounded-xl bg-white overflow-hidden">
+        <TrainingTabSwitcher
+          :active-tab="activeTab"
+          @change="activeTab = $event"
+        />
 
-        <div>
-          <div class="text-gray-500">Due</div>
-          <div class="text-lg font-semibold">{{ summary.duePositions }}</div>
-        </div>
-      </div>
-    </div>
+        <ScheduledTrainingTab
+          v-if="activeTab === 'scheduled'"
+          :days="scheduledDays"
+          @start-opening="startScheduledOpening"
+          @start-all="startAllScheduled"
+        />
 
-    <div v-if="position" class="border rounded p-3 space-y-4">
-      <div>
-        <div class="text-sm text-gray-500">Opening</div>
-        <div class="font-medium">{{ position.openingName }}</div>
-      </div>
-
-      <div class="flex justify-center">
-        <ChessBoard
-          :key="boardKey"
-          :fen="position.fen"
-          :orientation="boardOrientation"
-          @move="onBoardMove"
-          @promotion="onPromotion"
+        <CustomTrainingTab
+          v-else
+          :grouped-openings="groupedOpenings"
+          :selected-opening-id="selectedCustomOpeningId"
+          @update:selected-opening-id="selectedCustomOpeningId = $event"
+          @start="startCustomOpening"
         />
       </div>
+    </template>
 
-      <div v-if="feedbackMessage" class="border rounded p-3 text-sm">
-        {{ feedbackMessage }}
+    <template v-else>
+      <TrainingSessionHeader
+        :opening-name="startedOpeningName"
+        @back="backToSetup"
+      />
+
+      <TrainingSummaryCards
+        v-if="summary"
+        :summary="summary"
+      />
+
+      <TrainingBoardCard
+        v-if="position"
+        :board-key="boardKey"
+        :fen="position.fen"
+        :opening-name="position.openingName"
+        :orientation="boardOrientation"
+        :feedback-message="feedbackMessage"
+        @move="onBoardMove"
+        @promotion="onPromotion"
+      />
+
+      <div
+        v-else
+        class="border rounded-xl bg-white p-4 text-sm text-gray-500"
+      >
+        No training positions available
       </div>
-    </div>
+    </template>
 
-    <div v-else class="border rounded p-3 text-sm text-gray-500">
-      No training positions available
-    </div>
-
-    <div
-      v-if="showPromotion"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-    >
-      <div class="bg-white rounded shadow p-4 space-y-3">
-        <div class="grid grid-cols-4 gap-3">
-          <button
-            v-for="p in promotionPieces"
-            :key="p"
-            type="button"
-            class="w-12 h-12 flex items-center justify-center rounded hover:bg-gray-100"
-            @click="confirmPromotion(p)"
-          >
-            <img
-              :src="`/chess-pieces/${promotionColor}${p}.svg`"
-              alt=""
-              class="w-10 h-10 select-none pointer-events-none"
-              draggable="false"
-            />
-          </button>
-        </div>
-
-        <div class="flex justify-end">
-          <button
-            type="button"
-            class="text-sm text-gray-600 hover:text-gray-900"
-            @click="cancelPromotion"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+    <PromotionModal
+      :show="showPromotion"
+      :promotion-color="promotionColor"
+      @confirm="confirmPromotion"
+      @cancel="cancelPromotion"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import ChessBoard from '@/components/chess/ChessBoard.vue'
+import { computed, onUnmounted, ref } from 'vue'
+import TrainingSetupPanel from '@/components/training/setup/TrainingSetupPanel.vue'
+import TrainingTabSwitcher from '@/components/training/setup/TrainingTabSwitcher.vue'
+import ScheduledTrainingTab from '@/components/training/setup/ScheduledTrainingTab.vue'
+import CustomTrainingTab from '@/components/training/setup/CustomTrainingTab.vue'
+import TrainingSessionHeader from '@/components/training/session/TrainingSessionHeader.vue'
+import TrainingSummaryCards from '@/components/training/session/TrainingSummaryCards.vue'
+import TrainingBoardCard from '@/components/training/session/TrainingBoardCard.vue'
+import PromotionModal from '@/components/training/session/PromotionModal.vue'
 import {
   getNextTrainingPosition,
   getTrainingSummary,
@@ -99,6 +91,43 @@ import {
 const WHITE = 1
 const BLACK = 2
 
+type SetupLineDepth = 'mainline' | 'sidelines' | 'all'
+type TrainingTab = 'scheduled' | 'custom'
+
+type TrainingSetup = {
+  linesToLearn: number
+  lineDepth: SetupLineDepth
+}
+
+type MockOpening = {
+  id: number
+  name: string
+  color: 'White' | 'Black'
+  lines: number
+}
+
+type ScheduledDay = {
+  key: string
+  monthLabel: string
+  weekLabel: string
+  white: MockOpening[]
+  black: MockOpening[]
+}
+
+type GroupedOpenings = {
+  label: string
+  items: MockOpening[]
+}
+
+const setup = ref<TrainingSetup>({
+  linesToLearn: 8,
+  lineDepth: 'mainline'
+})
+
+const activeTab = ref<TrainingTab>('scheduled')
+const trainingStarted = ref(false)
+const startedOpeningName = ref('')
+
 const summary = ref<GetTrainingSummaryResponse | null>(null)
 const position = ref<GetNextTrainingPositionResponse | null>(null)
 const feedbackMessage = ref('')
@@ -109,9 +138,63 @@ const showPromotion = ref(false)
 const promotionPieces = ['Q', 'R', 'B', 'N'] as const
 const pendingPromotion = ref<{ from: string; to: string } | null>(null)
 
+const selectedCustomOpeningId = ref<number | ''>('')
+
 let autoPlayTimeoutId: number | null = null
 
 type PromotionPiece = typeof promotionPieces[number]
+
+const openings = ref<MockOpening[]>([
+  { id: 1, name: 'Italian Game', color: 'White', lines: 8 },
+  { id: 2, name: 'Queen’s Gambit', color: 'White', lines: 6 },
+  { id: 3, name: 'London System', color: 'White', lines: 15 },
+  { id: 4, name: 'Sicilian Defense', color: 'Black', lines: 9 },
+  { id: 5, name: 'French Defense', color: 'Black', lines: 7 },
+  { id: 6, name: 'Caro-Kann Defense', color: 'Black', lines: 6 }
+])
+
+const scheduledDays = ref<ScheduledDay[]>([
+  {
+    key: 'day-1',
+    monthLabel: 'March 17',
+    weekLabel: 'Monday',
+    white: [
+      { id: 1, name: 'Italian Game', color: 'White', lines: 8 },
+      { id: 2, name: 'Queen’s Gambit', color: 'White', lines: 6 }
+    ],
+    black: [
+      { id: 4, name: 'Sicilian Defense', color: 'Black', lines: 9 }
+    ]
+  },
+  {
+    key: 'day-2',
+    monthLabel: 'March 18',
+    weekLabel: 'Tuesday',
+    white: [
+      { id: 3, name: 'London System', color: 'White', lines: 15 }
+    ],
+    black: [
+      { id: 5, name: 'French Defense', color: 'Black', lines: 7 },
+      { id: 6, name: 'Caro-Kann Defense', color: 'Black', lines: 6 }
+    ]
+  }
+])
+
+const groupedOpenings = computed<GroupedOpenings[]>(() => [
+  {
+    label: 'White',
+    items: openings.value.filter(x => x.color === 'White')
+  },
+  {
+    label: 'Black',
+    items: openings.value.filter(x => x.color === 'Black')
+  }
+])
+
+const selectedCustomOpening = computed(() => {
+  if (selectedCustomOpeningId.value === '') return null
+  return openings.value.find(x => x.id === selectedCustomOpeningId.value) ?? null
+})
 
 const boardOrientation = computed<'white' | 'black'>(() => {
   if (!position.value) return 'white'
@@ -123,13 +206,39 @@ const promotionColor = computed(() => {
   return position.value.sideToMove === 'w' ? 'w' : 'b'
 })
 
-onMounted(async () => {
-  await loadPage()
-})
-
 onUnmounted(() => {
   clearAutoPlayTimeout()
 })
+
+async function startScheduledOpening(item: MockOpening) {
+  startedOpeningName.value = item.name
+  await startTraining()
+}
+
+async function startAllScheduled() {
+  startedOpeningName.value = 'Scheduled training'
+  await startTraining()
+}
+
+async function startCustomOpening() {
+  if (!selectedCustomOpening.value) return
+
+  startedOpeningName.value = selectedCustomOpening.value.name
+  await startTraining()
+}
+
+async function startTraining() {
+  trainingStarted.value = true
+  await loadPage()
+}
+
+function backToSetup() {
+  clearAutoPlayTimeout()
+  trainingStarted.value = false
+  position.value = null
+  feedbackMessage.value = ''
+  startedOpeningName.value = ''
+}
 
 async function loadPage() {
   await loadSummary()
@@ -196,11 +305,10 @@ async function confirmPromotion(piece: PromotionPiece) {
   }
 
   const { from, to } = pendingPromotion.value
+  const uci = `${from}${to}${piece}`
 
   showPromotion.value = false
   pendingPromotion.value = null
-
-  const uci = `${from}${to}${piece}`
 
   if (expectedMove.moveUci !== uci) {
     feedbackMessage.value = `Incorrect. Correct move: ${expectedMove.moveSan}`
