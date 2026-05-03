@@ -62,7 +62,7 @@ public sealed class AddMoveHandler
             Fen = newFen,
             MoveUci = request.MoveUci,
             MoveSan = moveSan, 
-            LineType = LineType.Main,
+            LineType = parent?.LineType ?? LineType.Main,
             CreatedAtUtc = DateTime.UtcNow
         };
 

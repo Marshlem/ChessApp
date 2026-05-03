@@ -28,4 +28,14 @@ public sealed class OpeningNodesController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPatch("{nodeId:int}/type")]
+    public async Task<IActionResult> UpdateNodeType(int openingId, int nodeId, [FromBody] UpdateNodeTypeRequest request, [FromServices] UpdateNodeTypeHandler handler)
+    {
+        var userId = UserContext.GetUserId(User);
+
+        var result = await handler.Execute(userId, openingId, nodeId, request);
+
+        return Ok(result);
+    }
 }

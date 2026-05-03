@@ -13,7 +13,6 @@ public sealed class GetCandidateMovesQuery
 
     public async Task<List<CandidateMoveDto>> Execute(int userId, string fen, int? currentOpeningId)
     {
-        // 1. randam VISUS node'us su šita FEN
         var parentNodes = await _db.OpeningNodes
             .Where(n => n.Fen == fen)
             .Select(n => new { n.Id, n.OpeningId })
@@ -24,7 +23,6 @@ public sealed class GetCandidateMovesQuery
 
         var parentNodeIds = parentNodes.Select(x => x.Id).ToList();
 
-        // 2. imam jų vaikus (candidate moves)
         var moves = await _db.OpeningNodes
             .Where(n => parentNodeIds.Contains(n.ParentNodeId!.Value))
             .Join(
@@ -41,6 +39,7 @@ public sealed class GetCandidateMovesQuery
                 OpeningName = x.Opening.Name,
                 MoveSan = x.Node.MoveSan!,
                 MoveUci = x.Node.MoveUci!,
+                LineType = x.Node.LineType,
                 IsFromCurrentOpening =
                     currentOpeningId != null &&
                     x.Opening.Id == currentOpeningId

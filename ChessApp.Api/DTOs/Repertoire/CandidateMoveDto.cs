@@ -10,5 +10,6 @@ public sealed class CandidateMoveDto
     public string OpeningName { get; set; } = null!;
     public string MoveSan { get; set; } = null!;
     public string MoveUci { get; set; } = null!;
+    public LineType LineType { get; set; }
     public bool IsFromCurrentOpening { get; set; }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 space-y-4" :key="openingId">
+  <div class="mx-auto space-y-4" :key="openingId">
     <h1 class="text-2xl font-semibold">
       Opening editor
     </h1>

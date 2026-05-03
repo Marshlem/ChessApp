@@ -1,5 +1,11 @@
 import api from '@/services/api'
 
+export enum LineType {
+  Main = 1,
+  Side = 2,
+  Other = 3
+}
+
 export interface RepertoireItem {
   id: string
   parentId?: string | null
@@ -15,6 +21,13 @@ export type CandidateMove = {
   openingId: number
   openingName: string
   isFromCurrentOpening: boolean
+  lineType: LineType
+}
+
+export interface UpdateCandidateMoveLineTypeRequest {
+  openingId: number
+  nodeId: number
+  lineType: LineType
 }
 
 export async function getRepertoireTree(): Promise<RepertoireItem[]> {
@@ -50,4 +63,15 @@ export async function deleteOpeningNodeSubtree(
   nodeId: number
 ) {
   await api.delete(`/openings/${openingId}/nodes/${nodeId}`)
+}
+
+export async function updateCandidateMoveLineType(request: UpdateCandidateMoveLineTypeRequest) {
+  const { data } = await api.patch(
+    `/openings/${request.openingId}/nodes/${request.nodeId}/type`,
+    {
+      lineType: request.lineType
+    }
+  )
+
+  return data
 }
