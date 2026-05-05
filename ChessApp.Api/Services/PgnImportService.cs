@@ -9,6 +9,8 @@ namespace ChessApp.API.Handlers.Repertoire;
 
 public sealed class PgnImportService
 {
+    private const string CommentTokenPrefix = "__COMMENT_";
+
     private readonly ApplicationDbContext _db;
 
     public PgnImportService(ApplicationDbContext db)
@@ -22,7 +24,8 @@ public sealed class PgnImportService
         string pgnText,
         CancellationToken cancellationToken)
     {
-        var moveTokens = GetPgnMoveTokens(pgnText);
+        var commentsByToken = new Dictionary<string, string>();
+        var tokens = GetPgnTokens(pgnText, commentsByToken);
 
         var nodesByFen = await _db.OpeningNodes
             .Where(x => x.OpeningId == openingId)
@@ -32,32 +35,36 @@ public sealed class PgnImportService
 
         var tokenIndex = 0;
 
-        ImportMoveLine(
+        ImportLine(
             openingId,
             rootNode,
             rootNode.Fen,
-            moveTokens,
+            tokens,
             ref tokenIndex,
-            nodesByFen);
+            nodesByFen,
+            commentsByToken);
     }
 
-    private void ImportMoveLine(
+    private void ImportLine(
         int openingId,
         OpeningNode startNode,
         string startFen,
-        IReadOnlyList<string> moveTokens,
+        IReadOnlyList<string> tokens,
         ref int tokenIndex,
-        Dictionary<string, OpeningNode> nodesByFen)
+        Dictionary<string, OpeningNode> nodesByFen,
+        IReadOnlyDictionary<string, string> commentsByToken)
     {
         var currentNode = startNode;
         var currentFen = startFen;
 
+        OpeningNode? lastMoveNode = null;
+
         OpeningNode? variationStartNode = null;
         string? variationStartFen = null;
 
-        while (tokenIndex < moveTokens.Count)
+        while (tokenIndex < tokens.Count)
         {
-            var token = moveTokens[tokenIndex];
+            var token = tokens[tokenIndex];
 
             if (token == ")")
             {
@@ -71,17 +78,18 @@ public sealed class PgnImportService
 
                 if (variationStartNode != null && variationStartFen != null)
                 {
-                    ImportMoveLine(
+                    ImportLine(
                         openingId,
                         variationStartNode,
                         variationStartFen,
-                        moveTokens,
+                        tokens,
                         ref tokenIndex,
-                        nodesByFen);
+                        nodesByFen,
+                        commentsByToken);
                 }
                 else
                 {
-                    SkipVariationBlock(moveTokens, ref tokenIndex);
+                    SkipVariation(tokens, ref tokenIndex);
                 }
 
                 continue;
@@ -89,10 +97,16 @@ public sealed class PgnImportService
 
             tokenIndex++;
 
-            if (ShouldIgnoreMoveToken(token))
+            if (commentsByToken.TryGetValue(token, out var comment))
+            {
+                AddCommentToNode(lastMoveNode, comment);
+                continue;
+            }
+
+            if (ShouldIgnoreToken(token))
                 continue;
 
-            var parentNodeBeforeMove = currentNode;
+            var parentBeforeMove = currentNode;
             var fenBeforeMove = currentFen;
 
             if (!ChessRules.TryApplySan(
@@ -105,42 +119,61 @@ public sealed class PgnImportService
                     $"Invalid PGN move '{token}' from FEN '{currentFen}'.");
             }
 
-            if (!nodesByFen.TryGetValue(newFen, out var nextNode))
-            {
-                nextNode = new OpeningNode
-                {
-                    OpeningId = openingId,
-                    ParentNode = currentNode,
-                    Fen = newFen,
-                    MoveSan = token,
-                    MoveUci = moveUci,
-                    LineType = currentNode.LineType == default
-                        ? LineType.Main
-                        : currentNode.LineType,
-                    CreatedAtUtc = DateTime.UtcNow
-                };
-
-                _db.OpeningNodes.Add(nextNode);
-                nodesByFen[newFen] = nextNode;
-            }
+            var nextNode = GetOrCreateNode(
+                openingId,
+                currentNode,
+                newFen,
+                token,
+                moveUci,
+                nodesByFen);
 
             currentNode = nextNode;
             currentFen = newFen;
+            lastMoveNode = nextNode;
 
-            // PGN variantas po ėjimo yra alternatyva iš pozicijos prieš tą ėjimą.
-            // Pvz.: 1. d4 d5 (1... Nf6)
-            // Nf6 turi kabėti nuo pozicijos po 1. d4, ne po 1... d5.
-            variationStartNode = parentNodeBeforeMove;
+            variationStartNode = parentBeforeMove;
             variationStartFen = fenBeforeMove;
         }
     }
 
-    private static List<string> GetPgnMoveTokens(string pgnText)
+    private OpeningNode GetOrCreateNode(
+        int openingId,
+        OpeningNode parentNode,
+        string fen,
+        string moveSan,
+        string moveUci,
+        Dictionary<string, OpeningNode> nodesByFen)
+    {
+        if (nodesByFen.TryGetValue(fen, out var existingNode))
+            return existingNode;
+
+        var newNode = new OpeningNode
+        {
+            OpeningId = openingId,
+            ParentNode = parentNode,
+            Fen = fen,
+            MoveSan = moveSan,
+            MoveUci = moveUci,
+            LineType = parentNode.LineType == default
+                ? LineType.Main
+                : parentNode.LineType,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        _db.OpeningNodes.Add(newNode);
+        nodesByFen[fen] = newNode;
+
+        return newNode;
+    }
+
+    private static List<string> GetPgnTokens(
+        string pgnText,
+        Dictionary<string, string> commentsByToken)
     {
         var moveText = RemovePgnHeaders(pgnText);
-        moveText = RemovePgnBraceComments(moveText);
-        moveText = RemovePgnLineComments(moveText);
-        moveText = NormalizePgnMoveText(moveText);
+        moveText = ReplaceBraceCommentsWithTokens(moveText, commentsByToken);
+        moveText = RemoveLineComments(moveText);
+        moveText = NormalizeMoveText(moveText);
 
         return moveText
             .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -158,15 +191,32 @@ public sealed class PgnImportService
             RegexOptions.Multiline);
     }
 
-    private static string RemovePgnBraceComments(string pgnText)
+    private static string ReplaceBraceCommentsWithTokens(
+        string pgnText,
+        Dictionary<string, string> commentsByToken)
     {
+        var index = 0;
+
         return Regex.Replace(
             pgnText,
-            @"\{[^}]*\}",
-            " ");
+            @"\{([^}]*)\}",
+            match =>
+            {
+                var token = $"{CommentTokenPrefix}{index++}__";
+                commentsByToken[token] = NormalizeComment(match.Groups[1].Value);
+                return $" {token} ";
+            });
     }
 
-    private static string RemovePgnLineComments(string pgnText)
+    private static string NormalizeComment(string comment)
+    {
+        return comment
+            .Replace("\r", " ")
+            .Replace("\n", " ")
+            .Trim();
+    }
+
+    private static string RemoveLineComments(string pgnText)
     {
         return Regex.Replace(
             pgnText,
@@ -174,14 +224,27 @@ public sealed class PgnImportService
             " ");
     }
 
-    private static string NormalizePgnMoveText(string moveText)
+    private static string NormalizeMoveText(string moveText)
     {
         return moveText
             .Replace("(", " ( ")
             .Replace(")", " ) ");
     }
 
-    private static bool ShouldIgnoreMoveToken(string token)
+    private static void AddCommentToNode(OpeningNode? node, string comment)
+    {
+        if (node == null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(comment))
+            return;
+
+        node.Comment = string.IsNullOrWhiteSpace(node.Comment)
+            ? comment
+            : $"{node.Comment}\n\n{comment}";
+    }
+
+    private static bool ShouldIgnoreToken(string token)
     {
         if (string.IsNullOrWhiteSpace(token))
             return true;
@@ -192,25 +255,24 @@ public sealed class PgnImportService
         if (token.StartsWith("$"))
             return true;
 
-        // Pvz.: 1. 2. 15. 1... 23...
         if (Regex.IsMatch(token, @"^\d+\.(\.\.)?$"))
             return true;
 
         return false;
     }
 
-    private static void SkipVariationBlock(
-        IReadOnlyList<string> moveTokens,
+    private static void SkipVariation(
+        IReadOnlyList<string> tokens,
         ref int tokenIndex)
     {
         var depth = 1;
 
-        while (tokenIndex < moveTokens.Count && depth > 0)
+        while (tokenIndex < tokens.Count && depth > 0)
         {
-            if (moveTokens[tokenIndex] == "(")
+            if (tokens[tokenIndex] == "(")
                 depth++;
 
-            if (moveTokens[tokenIndex] == ")")
+            if (tokens[tokenIndex] == ")")
                 depth--;
 
             tokenIndex++;
