@@ -26,7 +26,7 @@
             v-for="o in whiteOpenings"
             :key="o.id"
             class="cursor-pointer hover:bg-gray-100 rounded px-2 py-0.5 text-sm"
-            @click="openOpening(o.id)"
+            @click="openOpening(o.openingId)"
           >
             {{ o.name }}
           </li>
@@ -40,7 +40,7 @@
             v-for="o in blackOpenings"
             :key="o.id"
             class="cursor-pointer hover:bg-gray-100 rounded px-2 py-0.5 text-sm"
-            @click="openOpening(o.id)"
+            @click="openOpening(o.openingId)"
           >
             {{ o.name }}
           </li>
@@ -88,9 +88,10 @@ watch(
   }
 )
 
-function openOpening(openingId: string  ) {
+function openOpening(openingId?: number | null) {
   if (openingId == null) return
-  emit('select', Number(openingId))
+
+  emit('select', openingId)
 }
 
 async function reload() {

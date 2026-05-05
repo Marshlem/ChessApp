@@ -1,22 +1,31 @@
+using ChessApp.API.Constants;
 using ChessApp.API.Data;
 using ChessApp.API.DTOs.Repertoire;
 using ChessApp.API.Enums;
 using ChessApp.API.Models;
-using ChessApp.API.Constants;
 
 namespace ChessApp.API.Handlers.Repertoire;
+
 public sealed class CreateOpeningHandler
 {
     private readonly ApplicationDbContext _db;
+    private readonly PgnImportService _pgnImportService;
 
-    public CreateOpeningHandler(ApplicationDbContext db)
+    public CreateOpeningHandler(
+        ApplicationDbContext db,
+        PgnImportService pgnImportService)
     {
         _db = db;
+        _pgnImportService = pgnImportService;
     }
 
-    public async Task<int> Execute(int userId, CreateOpeningRequest request)
+    public async Task<int> Execute(
+        int userId,
+        CreateOpeningRequest request,
+        CancellationToken cancellationToken)
     {
         var name = request.Name.Trim();
+
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required");
 
@@ -28,7 +37,7 @@ public sealed class CreateOpeningHandler
         };
 
         _db.Openings.Add(opening);
-        await _db.SaveChangesAsync(); // reikia ID
+        await _db.SaveChangesAsync(cancellationToken); // reikia opening.Id
 
         var rootNode = new OpeningNode
         {
@@ -39,7 +48,7 @@ public sealed class CreateOpeningHandler
         };
 
         _db.OpeningNodes.Add(rootNode);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken); // reikia rootNode.Id
 
         opening.RootNodeId = rootNode.Id;
 
@@ -52,9 +61,19 @@ public sealed class CreateOpeningHandler
         };
 
         _db.RepertoireItems.Add(repertoireItem);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken); // kaip buvo sename variante
+
+        if (!string.IsNullOrWhiteSpace(request.PgnText))
+        {
+            await _pgnImportService.Import(
+                openingId: opening.Id,
+                rootNode: rootNode,
+                pgnText: request.PgnText,
+                cancellationToken: cancellationToken);
+
+            await _db.SaveChangesAsync(cancellationToken);
+        }
 
         return opening.Id;
     }
-
 }

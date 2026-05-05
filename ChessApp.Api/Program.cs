@@ -44,6 +44,7 @@ builder.Services.AddScoped<GetNextTrainingPositionHandler>();
 builder.Services.AddScoped<UpdateNodeTypeHandler>();
 
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.AddScoped<PgnImportService>();
 builder.Services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
 
 builder.Services.AddMediatR(cfg =>

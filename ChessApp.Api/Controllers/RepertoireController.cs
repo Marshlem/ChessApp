@@ -22,7 +22,7 @@ public sealed class RepertoireController : ControllerBase
     public async Task<IActionResult> CreateOpening([FromBody] CreateOpeningRequest request,[FromServices] CreateOpeningHandler handler)
     {
         var userId = UserContext.GetUserId(User);
-        var openingId = await handler.Execute(userId, request);
+        var openingId = await handler.Execute(userId, request, HttpContext.RequestAborted);
         return Ok(openingId);
     }
 }

@@ -6,4 +6,5 @@ public sealed class CreateOpeningRequest
 {
     public OpeningColor Color { get; set; }
     public string Name { get; set; } = null!;
+    public string? PgnText { get; set; }
 }

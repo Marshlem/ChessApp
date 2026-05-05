@@ -7,8 +7,8 @@ export enum LineType {
 }
 
 export interface RepertoireItem {
-  id: string
-  parentId?: string | null
+  id: number
+  parentId?: number | null
   name: string
   color: number
   openingId?: number | null
@@ -36,12 +36,12 @@ export async function getRepertoireTree(): Promise<RepertoireItem[]> {
 }
 
 export async function createOpening(payload: {
-  parentId?: string | null
   name: string
   color: number
+  pgnText?: string | null
 }) {
   const { data } = await api.post('/repertoire/opening', payload)
-  return data as string // openingId
+  return data as string
 }
 
 export async function getCandidateMoves(params: {
