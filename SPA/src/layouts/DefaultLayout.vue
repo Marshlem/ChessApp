@@ -38,7 +38,7 @@ import AppFooter from '@/layouts/AppFooter.vue'
     </header>
 
     <!-- PAGE CONTENT -->
-    <main class="p-4 flex-1">
+    <main class="px-4 py-1 flex-1">
       <router-view />
     </main>
 

@@ -1,4 +1,5 @@
 using ChessApp.API.Enums;
+using ChessDotNet;
 
 namespace ChessApp.API.Models;
 
@@ -18,6 +19,7 @@ public sealed class OpeningNode
 
     public LineType LineType { get; set; }
     public string? Comment { get; set; }
+    public MoveEvaluation? Evaluation { get; set; }
 
     public DateTime CreatedAtUtc { get; set; }
     public string? MoveUci { get; set; } = null!;

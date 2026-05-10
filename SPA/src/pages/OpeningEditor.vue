@@ -10,11 +10,29 @@
           <OpeningsList @select="openOpening" />
         </div>
 
-        <div class="display inline-block w-32 mr-6">
-            <MoveTable
-            v-if="opening"
-            :rows="moveTable"
+        <div v-if="opening" class="w-40 mr-6 flex flex-col gap-2 max-h-[480px]">
+          <div class="overflow-auto basis-2/5 min-h-0">
+            <MoveTable :rows="moveTable" />
+          </div>
+
+          <div class="overflow-auto basis-1/5 min-h-0">
+            <MoveEvaluations
+              v-if="currentMoveComment"
+              :node-id="currentMoveComment.nodeId"
+              :evaluation="currentMoveComment.evaluation"
+              @save-evaluation="saveEvaluation"
             />
+          </div>
+
+          <div class="overflow-auto basis-2/5 min-h-0">
+            <MoveComments
+              v-if="currentMoveComment"
+              :node-id="currentMoveComment.nodeId"
+              :label="currentMoveComment.label"
+              :comment="currentMoveComment.comment"
+              @save-comment="saveMoveComment"
+            />
+          </div>
         </div>
 
         <!-- Chessboard only -->
@@ -98,6 +116,8 @@ import MoveTable from '@/components/repertoire/MoveTable.vue'
 import OpeningsList from '@/components/repertoire/OpeningsList.vue'
 import CandidateMoves from '@/components/repertoire/CandidateMoves.vue'
 import { deleteOpeningNodeSubtree } from '@/services/repertoireService'
+import MoveComments from '@/components/repertoire/MoveComments.vue'
+import MoveEvaluations from '@/components/repertoire/MoveEvaluations.vue'
 
 interface Breadcrumb {
   id: number
@@ -109,7 +129,9 @@ interface OpeningNode {
   parentNodeId: number | null
   fen: string
   moveSan?: string
-  moveUci?: string 
+  moveUci?: string
+  comment?: string | null
+  evaluation?: number | null
 }
 
 interface OpeningDetails {
@@ -164,7 +186,15 @@ const moveTable = computed(() => {
 
   const line = buildLine(opening.value.nodes, currentNodeId.value)
 
-  const rows: { move: number; white?: string; black?: string }[] = []
+  const rows: {
+    move: number
+    white?: string
+    black?: string
+    whiteNodeId?: number
+    blackNodeId?: number
+    whiteComment?: string | null
+    blackComment?: string | null
+  }[] = []
 
   line.forEach(node => {
     if (!node.parentNodeId || !node.moveUci) return
@@ -183,13 +213,19 @@ const moveTable = computed(() => {
       rows.push(row)
     }
 
-    if (sideToMove === 'w') row.white = san
-    else row.black = san
+    if (sideToMove === 'w') {
+      row.white = san
+      row.whiteNodeId = node.id
+      row.whiteComment = node.comment
+    } else {
+      row.black = san
+      row.blackNodeId = node.id
+      row.blackComment = node.comment
+    }
   })
 
   return rows
 })
-
 
 const pendingPromotion = ref<{
   from: string
@@ -205,6 +241,30 @@ const nextMoves = computed(() => {
       from: n.moveUci!.slice(0, 2),
       to: n.moveUci!.slice(2, 4)
     }))
+})
+
+const currentMoveComment = computed(() => {
+  if (!opening.value || !currentNodeId.value) return null
+
+  const node = opening.value.nodes.find(n => n.id === currentNodeId.value)
+  if (!node || !node.parentNodeId || !node.moveUci) return null
+
+  const parent = opening.value.nodes.find(n => n.id === node.parentNodeId)
+  if (!parent) return null
+
+  const san = uciToSan(parent.fen, node.moveUci)
+
+  const [, sideToMove, , , , fullmove] = parent.fen.split(' ')
+  const moveNumber = Number(fullmove)
+
+  return {
+    nodeId: node.id,
+    label: sideToMove === 'w'
+      ? `${moveNumber}. ${san}`
+      : `${moveNumber}... ${san}`,
+    comment: node.comment ?? null,
+    evaluation: node.evaluation ?? null
+  }
 })
 
 onUnmounted(() => {
@@ -291,8 +351,10 @@ async function submitMove(uci: string) {
     id: res.data.nodeId,
     parentNodeId: parentId,
     fen: res.data.fen,
-    moveUci: uci, 
-    moveSan: res.data.moveSan
+    moveUci: uci,
+    moveSan: res.data.moveSan,
+    comment: res.data.comment ?? null,
+    evaluation: res.data.evaluation ?? null
   })
 
   boardKey.value++
@@ -370,6 +432,32 @@ async function handleDeleteFromHere(move: { nodeId: number; openingId: number; s
   currentFen.value = target?.fen ?? ''
   boardKey.value++
   candidateMovesKey.value++
+}
+
+async function saveMoveComment(payload: { nodeId: number; comment: string | null }) {
+  if (!opening.value || !openingId.value) return
+
+  await api.patch(`/openings/${openingId.value}/nodes/${payload.nodeId}/comment`, {
+    comment: payload.comment
+  })
+
+  const node = opening.value.nodes.find(n => n.id === payload.nodeId)
+  if (node) {
+    node.comment = payload.comment
+  }
+}
+
+async function saveEvaluation(payload: { nodeId: number; evaluation: number | null }) {
+  if (!opening.value || !openingId.value) return
+
+  await api.patch(`/openings/${openingId.value}/nodes/${payload.nodeId}/MoveEvaluation`, {
+    evaluation: payload.evaluation
+  })
+
+  const node = opening.value.nodes.find(n => n.id === payload.nodeId)
+  if (node) {
+    node.evaluation = payload.evaluation
+  }
 }
 
 </script>

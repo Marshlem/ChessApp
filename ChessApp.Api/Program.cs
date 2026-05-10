@@ -42,6 +42,8 @@ builder.Services.AddScoped<AddMoveHandler>();
 builder.Services.AddScoped<DeleteOpeningNodeSubtreeHandler>();
 builder.Services.AddScoped<GetNextTrainingPositionHandler>();
 builder.Services.AddScoped<UpdateNodeTypeHandler>();
+builder.Services.AddScoped<UpdateOpeningNodeCommentHandler>();
+builder.Services.AddScoped<UpdateOpeningNodeMoveEvaluationHandler>();
 
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<PgnImportService>();

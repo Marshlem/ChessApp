@@ -38,4 +38,34 @@ public sealed class OpeningNodesController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPatch("{nodeId:int}/comment")]
+    public async Task<IActionResult> UpdateComment(
+        int openingId,
+        int nodeId,
+        [FromBody] UpdateOpeningNodeCommentRequest request,
+        [FromServices] UpdateOpeningNodeCommentHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var userId = UserContext.GetUserId(User);
+
+        await handler.Execute(userId, openingId, nodeId, request, cancellationToken);
+
+        return Ok();
+    }
+
+    [HttpPatch("{nodeId:int}/moveEvaluation")]
+    public async Task<IActionResult> UpdateMoveEvaluation(
+        int openingId,
+        int nodeId,
+        [FromBody] UpdateOpeningNodeMoveEvaluationRequest request,
+        [FromServices] UpdateOpeningNodeMoveEvaluationHandler handler,
+        CancellationToken cancellationToken)
+    {
+        var userId = UserContext.GetUserId(User);
+
+        await handler.Execute(userId, openingId, nodeId, request, cancellationToken);
+
+        return Ok();
+    }
 }

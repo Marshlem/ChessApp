@@ -55,7 +55,9 @@ public sealed class GetOpeningDetailsQuery
                 ParentNodeId = x.ParentNodeId,
                 Fen = x.Fen,
                 MoveSan = x.MoveSan,
-                MoveUci = x.MoveUci
+                MoveUci = x.MoveUci,
+                Comment = x.Comment,
+                Evaluation = x.Evaluation,
             })
             .ToListAsync();
 

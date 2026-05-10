@@ -75,3 +75,7 @@ export async function updateCandidateMoveLineType(request: UpdateCandidateMoveLi
 
   return data
 }
+
+export async function deleteOpening(openingId: number) {
+  await api.delete(`/openings/${openingId}`)
+}
